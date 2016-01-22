@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_800"
-    android:id="@+id/ll">
+    android:id="@+id/rl">
 
     <com.etiennelawlor.imagegallery.library.view.TouchImageView
         android:id="@+id/iv"
@@ -14,4 +14,65 @@
         android:scaleType="fitCenter"
         android:visibility="visible"/>
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:padding="15dp"
+        android:background="@color/transparent_black_twenty">
+
+        <TextView
+            android:id="@+id/tv_comment"
+            android:layout_width="match_parent"
+            android:textColor="@color/grey_white_1000"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"/>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_account_circle_white_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/grey_300"
+                    android:textSize="14sp"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginLeft="6dp"/>
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/grey_300"
+                    android:textSize="14sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+    <ImageButton
+        android:id="@+id/btn_favorite_me"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_favorite_border_white_36dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/radial_gradient"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:padding="15dp"/>
+</RelativeLayout>

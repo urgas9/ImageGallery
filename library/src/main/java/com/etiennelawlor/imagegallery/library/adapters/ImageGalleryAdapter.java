@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.etiennelawlor.imagegallery.library.R;
+import com.etiennelawlor.imagegallery.library.data.ImageData;
 import com.etiennelawlor.imagegallery.library.util.ImageGalleryUtils;
 import com.squareup.picasso.Picasso;
 
@@ -20,7 +21,7 @@ import java.util.List;
 public class ImageGalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // region Member Variables
-    private final List<String> mImages;
+    private final List<ImageData> mImages;
     private int mGridItemWidth;
     private int mGridItemHeight;
     private OnImageClickListener mOnImageClickListener;
@@ -33,7 +34,7 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     // endregion
 
     // region Constructors
-    public ImageGalleryAdapter(List<String> images) {
+    public ImageGalleryAdapter(List<ImageData> images) {
         mImages = images;
     }
     // endregion
@@ -50,9 +51,9 @@ public class ImageGalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         final ImageViewHolder holder = (ImageViewHolder) viewHolder;
 
-        String image = mImages.get(position);
+        ImageData image = mImages.get(position);
 
-        setUpImage(holder.mImageView, image);
+        setUpImage(holder.mImageView, image.getImageUrl());
 
         holder.mFrameLayout.setOnClickListener(new View.OnClickListener() {
             @Override

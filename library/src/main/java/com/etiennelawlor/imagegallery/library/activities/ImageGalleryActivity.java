@@ -9,11 +9,11 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.etiennelawlor.imagegallery.library.R;
 import com.etiennelawlor.imagegallery.library.adapters.ImageGalleryAdapter;
 import com.etiennelawlor.imagegallery.library.enums.PaletteColorType;
+import com.etiennelawlor.imagegallery.library.data.ImageData;
 import com.etiennelawlor.imagegallery.library.util.ImageGalleryUtils;
 import com.etiennelawlor.imagegallery.library.view.GridSpacesItemDecoration;
 
@@ -22,11 +22,13 @@ import java.util.ArrayList;
 public class ImageGalleryActivity extends AppCompatActivity implements ImageGalleryAdapter.OnImageClickListener {
 
     // region Member Variables
-    private ArrayList<String> mImages;
+    private ArrayList<ImageData> mImages;
     private PaletteColorType mPaletteColorType;
 
     private Toolbar mToolbar;
     private RecyclerView mRecyclerView;
+    private String mTitle;
+    private boolean mShowComments;
     // endregion
 
     // region Lifecycle Methods
@@ -43,13 +45,14 @@ public class ImageGalleryActivity extends AppCompatActivity implements ImageGall
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-
         Intent intent = getIntent();
         if (intent != null) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
-                mImages = extras.getStringArrayList("images");
+                mImages = extras.getParcelableArrayList("images");
+                mTitle = extras.getString("title");
                 mPaletteColorType = (PaletteColorType) extras.get("palette_color_type");
+                mShowComments = extras.getBoolean("show_comments");
             }
         }
 
@@ -78,8 +81,9 @@ public class ImageGalleryActivity extends AppCompatActivity implements ImageGall
     public void onImageClick(int position) {
         Intent intent = new Intent(ImageGalleryActivity.this, FullScreenImageGalleryActivity.class);
 
-        intent.putStringArrayListExtra("images", mImages);
+        intent.putParcelableArrayListExtra("images", mImages);
         intent.putExtra("position", position);
+        intent.putExtra("show_comments", mShowComments);
         if (mPaletteColorType != null) {
             intent.putExtra("palette_color_type", mPaletteColorType);
         }
@@ -108,6 +112,24 @@ public class ImageGalleryActivity extends AppCompatActivity implements ImageGall
         imageGalleryAdapter.setOnImageClickListener(this);
 
         mRecyclerView.setAdapter(imageGalleryAdapter);
+
+        setActionBarTitle();
+    }
+    private void setActionBarTitle() {
+        ActionBar actionBar = getSupportActionBar();
+        if(mRecyclerView == null || actionBar == null){
+            return;
+        }
+        int totalImages = mRecyclerView.getAdapter().getItemCount();
+
+        String subTitle = String.format("%d photos", totalImages);
+        if(mTitle == null) {
+            actionBar.setTitle(subTitle);
+        }
+        else{
+            actionBar.setTitle(mTitle);
+            actionBar.setSubtitle(subTitle);
+        }
     }
     // endregion
 }

@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import com.etiennelawlor.imagegallery.library.R;
 import com.etiennelawlor.imagegallery.library.adapters.FullScreenImageGalleryAdapter;
 import com.etiennelawlor.imagegallery.library.enums.PaletteColorType;
-import com.etiennelawlor.imagegallery.library.util.ImageGalleryUtils;
+import com.etiennelawlor.imagegallery.library.data.ImageData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,14 @@ import java.util.List;
 public class FullScreenImageGalleryActivity extends AppCompatActivity {
 
     // region Member Variables
-    private List<String> mImages;
+    private List<ImageData> mImages;
     private int mPosition;
     private PaletteColorType mPaletteColorType;
 
     private Toolbar mToolbar;
     private ViewPager mViewPager;
+    private String mTitle;
+    private boolean mShowComments;
     // endregion
 
     // region Listeners
@@ -69,9 +71,11 @@ public class FullScreenImageGalleryActivity extends AppCompatActivity {
         if (intent != null) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
-                mImages = extras.getStringArrayList("images");
+                mImages = extras.getParcelableArrayList("images");
+                mTitle = extras.getString("title");
                 mPaletteColorType = (PaletteColorType) extras.get("palette_color_type");
                 mPosition = extras.getInt("position");
+                mShowComments = extras.getBoolean("show_comments");
             }
         }
 
@@ -102,10 +106,10 @@ public class FullScreenImageGalleryActivity extends AppCompatActivity {
     }
 
     private void setUpViewPager() {
-        ArrayList<String> images = new ArrayList<>();
+        ArrayList<ImageData> images = new ArrayList<>();
         images.addAll(mImages);
 
-        FullScreenImageGalleryAdapter fullScreenImageGalleryAdapter = new FullScreenImageGalleryAdapter(images, mPaletteColorType);
+        FullScreenImageGalleryAdapter fullScreenImageGalleryAdapter = new FullScreenImageGalleryAdapter(images, mPaletteColorType, mShowComments);
         mViewPager.setAdapter(fullScreenImageGalleryAdapter);
         mViewPager.addOnPageChangeListener(mViewPagerOnPageChangeListener);
         mViewPager.setCurrentItem(mPosition);
@@ -119,7 +123,14 @@ public class FullScreenImageGalleryActivity extends AppCompatActivity {
 
             ActionBar actionBar = getSupportActionBar();
             if(actionBar != null){
-                actionBar.setTitle(String.format("%d of %d", (position + 1), totalPages));
+                String subTitle = String.format("%d of %d", (position + 1), totalPages);
+                if(mTitle == null) {
+                    actionBar.setTitle(subTitle);
+                }
+                else{
+                    actionBar.setTitle(mTitle);
+                    actionBar.setSubtitle(subTitle);
+                }
             }
         }
     }

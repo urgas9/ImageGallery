@@ -1,16 +1,20 @@
 package com.etiennelawlor.imagegallery.library.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.etiennelawlor.imagegallery.library.R;
+import com.etiennelawlor.imagegallery.library.data.ImageData;
 import com.etiennelawlor.imagegallery.library.enums.PaletteColorType;
 import com.etiennelawlor.imagegallery.library.util.ImageGalleryUtils;
 import com.etiennelawlor.imagegallery.library.view.PaletteTransformation;
@@ -24,14 +28,16 @@ import java.util.List;
 public class FullScreenImageGalleryAdapter extends PagerAdapter {
 
     // region Member Variables
-    private final List<String> mImages;
+    private final List<ImageData> mImages;
     private final PaletteColorType mPaletteColorType;
+    private final boolean mShowComments;
     // endregion
 
     // region Constructors
-    public FullScreenImageGalleryAdapter(List<String> images, PaletteColorType paletteColorType) {
+    public FullScreenImageGalleryAdapter(List<ImageData> images, PaletteColorType paletteColorType, boolean showComments) {
         mImages = images;
         mPaletteColorType = paletteColorType;
+        mShowComments = showComments;
     }
     // endregion
 
@@ -42,34 +48,82 @@ public class FullScreenImageGalleryAdapter extends PagerAdapter {
 
         View view = inflater.inflate(R.layout.fullscreen_image, null);
 
-        ImageView imageView = (ImageView) view.findViewById(R.id.iv);
-        final LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.ll);
+        final ImageView imageView = (ImageView) view.findViewById(R.id.iv);
+        final RelativeLayout relativeLayout = (RelativeLayout) view.findViewById(R.id.rl);
 
-        String image = mImages.get(position);
+        final ImageData imageData = mImages.get(position);
 
-        Context context = imageView.getContext();
+        final Context context = imageView.getContext();
         int width = ImageGalleryUtils.getScreenWidth(context);
 
-        if (!TextUtils.isEmpty(image)) {
+        if (!TextUtils.isEmpty(imageData.getImageUrl())) {
             Picasso.with(imageView.getContext())
-                    .load(image)
+                    .load(imageData.getImageUrl())
                     .resize(width, 0)
                     .transform(PaletteTransformation.instance())
                     .into(imageView, new PaletteTransformation.PaletteCallback(imageView) {
                         @Override
                         public void onError() {
-
+                            imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_photo_size_select_actual_white_48dp));
+                            imageView.setScaleType(ImageView.ScaleType.CENTER);
                         }
 
                         @Override
                         public void onSuccess(Palette palette) {
                             int bgColor = getBackgroundColor(palette);
                             if (bgColor != -1)
-                                linearLayout.setBackgroundColor(bgColor);
+                                relativeLayout.setBackgroundColor(bgColor);
                         }
                     });
         } else {
-            imageView.setImageDrawable(null);
+            imageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_photo_size_select_actual_white_48dp));
+        }
+
+
+        if(mShowComments) {
+            if (imageData.getComment() != null) {
+                ((TextView) view.findViewById(R.id.tv_comment)).setText(imageData.getComment());
+            }
+            else{
+                view.findViewById(R.id.tv_comment).setVisibility(View.GONE);
+            }
+
+            final ImageView userAvatarImageView = (ImageView) view.findViewById(R.id.iv_avatar);
+            Picasso.with(context)
+                    .load(imageData.getUserAvatarUrl())
+                    .error(R.drawable.ic_account_circle_white_24dp)
+                    .into(userAvatarImageView);
+
+            if (imageData.getUserName() != null) {
+                ((TextView) view.findViewById(R.id.tv_name)).setText(imageData.getUserName());
+            }
+
+            if (imageData.getTimePosted() != null) {
+                ((TextView) view.findViewById(R.id.tv_date)).setText(imageData.getTimePosted());
+            }
+
+            final ImageButton favoriteButton = (ImageButton) view.findViewById(R.id.btn_favorite_me);
+            if (imageData.isLiked()) {
+                setButtonDrawable(favoriteButton, context, R.drawable.ic_favorite_white_36dp);
+            }
+
+            favoriteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: Send action to server
+                    if (!imageData.isLiked()) {
+                        setButtonDrawable(favoriteButton, context, R.drawable.ic_favorite_white_36dp);
+                        imageData.setLiked(true);
+                    } else {
+                        setButtonDrawable(favoriteButton, context, R.drawable.ic_favorite_border_white_36dp);
+                        imageData.setLiked(false);
+                    }
+                }
+            });
+        }
+        else{
+            view.findViewById(R.id.btn_favorite_me).setVisibility(View.GONE);
+            view.findViewById(R.id.ll_comment).setVisibility(View.GONE);
         }
 
 
@@ -94,6 +148,9 @@ public class FullScreenImageGalleryAdapter extends PagerAdapter {
     }
 
     // region Helper Methods
+    private void setButtonDrawable(ImageButton ib, Context context, int resourceId){
+        ib.setImageDrawable(ContextCompat.getDrawable(context, resourceId));
+    }
     private int getBackgroundColor(Palette palette) {
         int bgColor = -1;
 
